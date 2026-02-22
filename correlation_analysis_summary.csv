@@ -1,0 +1,3 @@
+Analysis_Level,Correlation_Coefficient_r,P_Value,Sample_Size,Statistically_Significant
+Aggregated (by Model),0.6345387591362179,0.03598221972256764,11,True
+Granular (All Messages),0.4228724252837196,7.205870855509588e-275,6372,True

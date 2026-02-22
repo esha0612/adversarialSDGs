@@ -471,6 +471,19 @@ class CorrelationAnalyzer:
         df.to_csv('correlation_analysis_granular.csv', index=False)
         print("Granular results saved to: correlation_analysis_granular.csv")
         
+        # Save correlation summary
+        if r_agg is not None:
+            summary_data = {
+                'Analysis_Level': ['Aggregated (by Model)', 'Granular (All Messages)'],
+                'Correlation_Coefficient_r': [r_agg, r_granular],
+                'P_Value': [p_agg, p_granular],
+                'Sample_Size': [len(df_agg), len(df)],
+                'Statistically_Significant': [p_agg < 0.05, p_granular < 0.05]
+            }
+            summary_df = pd.DataFrame(summary_data)
+            summary_df.to_csv('correlation_analysis_summary.csv', index=False)
+            print("Summary results saved to: correlation_analysis_summary.csv")
+        
         print("\n" + "=" * 70)
         print("Analysis Complete!")
         print("=" * 70)

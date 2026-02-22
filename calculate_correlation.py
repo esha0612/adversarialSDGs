@@ -454,36 +454,46 @@ class CorrelationAnalyzer:
         
         # Step 4: Create aggregated DataFrame
         df_agg = self.create_aggregated_dataframe(df)
-        
-        # Step 5: Calculate correlations
-        r_granular, p_granular = self.calculate_correlation_granular(df)
-        r_agg, p_agg = self.calculate_correlation_aggregated(df_agg)
-        
-        # Step 6: Interpret results
-        if r_agg is not None:
-            self.interpret_correlation(r_agg, p_agg)
-        
+
+        # Replace adversarial counts with user-provided values
+        user_adversarial_counts = {
+            'Derek': 674,
+            'Enrique': 540,
+            'George': 421,
+            'Maria': 869,
+            'Sarah': 509,
+            'Anika': 592,
+            'Peter': 470,
+            'Philip': 745,
+            'Talia': 750,
+            'Emma': 655
+        }
+        # Update Total_Adversarial_Count column
+        df_agg['Total_Adversarial_Count'] = df_agg['Model_Name'].map(user_adversarial_counts)
+
+        # Calculate Pearson correlation using Avg_Response_Length and Total_Adversarial_Count
+        print("\n=== STEP: Calculating Pearson Correlation with User Values ===")
+        valid_df = df_agg.dropna(subset=['Avg_Response_Length', 'Total_Adversarial_Count'])
+        r, p_value = pearsonr(valid_df['Avg_Response_Length'], valid_df['Total_Adversarial_Count'])
+        print(f"Pearson Correlation Coefficient (r): {r:.4f}")
+        print(f"P-value: {p_value:.6f}")
+
         # Save results to CSV
         print("\n=== Saving Results ===")
-        df_agg.to_csv('correlation_analysis_aggregated.csv', index=False)
-        print("Aggregated results saved to: correlation_analysis_aggregated.csv")
-        
-        df.to_csv('correlation_analysis_granular.csv', index=False)
-        print("Granular results saved to: correlation_analysis_granular.csv")
-        
+        valid_df.to_csv('correlation_analysis_aggregated_user.csv', index=False)
+        print("Aggregated results with user values saved to: correlation_analysis_aggregated_user.csv")
+
         # Save correlation summary
-        if r_agg is not None:
-            summary_data = {
-                'Analysis_Level': ['Aggregated (by Model)', 'Granular (All Messages)'],
-                'Correlation_Coefficient_r': [r_agg, r_granular],
-                'P_Value': [p_agg, p_granular],
-                'Sample_Size': [len(df_agg), len(df)],
-                'Statistically_Significant': [p_agg < 0.05, p_granular < 0.05]
-            }
-            summary_df = pd.DataFrame(summary_data)
-            summary_df.to_csv('correlation_analysis_summary.csv', index=False)
-            print("Summary results saved to: correlation_analysis_summary.csv")
-        
+        summary_data = {
+            'Correlation_Coefficient_r': [r],
+            'P_Value': [p_value],
+            'Sample_Size': [len(valid_df)],
+            'Statistically_Significant': [p_value < 0.05]
+        }
+        summary_df = pd.DataFrame(summary_data)
+        summary_df.to_csv('correlation_analysis_summary_user.csv', index=False)
+        print("Summary results saved to: correlation_analysis_summary_user.csv")
+
         print("\n" + "=" * 70)
         print("Analysis Complete!")
         print("=" * 70)
